@@ -1,0 +1,102 @@
+name: Build KernelSU module
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      test_version:
+        description: 'Optional version override for test artifacts (e.g. v0.1.1)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # Required when publishing a tag release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Syntax check
+        run: |
+          for f in customize.sh service.sh action.sh bin/guard.sh bin/config.sh bin/validate.sh; do
+            sh -n "$f"
+          done
+          bash -n tools/package.sh
+          node --check webroot/app.js
+
+      - name: Build module ZIP
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
+          TEST_VERSION: ${{ inputs.test_version }}
+        run: |
+          if [ "$EVENT_NAME" = 'push' ] && [ "$REF_TYPE" = 'tag' ]; then
+            bash tools/package.sh "$REF_NAME"
+          elif [ "$EVENT_NAME" = 'workflow_dispatch' ] && [ -n "$TEST_VERSION" ]; then
+            bash tools/package.sh "$TEST_VERSION"
+          else
+            bash tools/package.sh
+          fi
+
+      # Only published tag releases receive an update manifest.
+      # Manual Actions artifacts do not participate in in-app update checks.
+      - name: Prepare release metadata
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          zip_file="dist/susfs4ksu-lkm-hide-mounts-by-mask-${GITHUB_REF_NAME}.zip"
+          test -f "$zip_file"
+          version="$(unzip -p "$zip_file" module.prop | sed -n 's/^version=//p')"
+          version_code="$(unzip -p "$zip_file" module.prop | sed -n 's/^versionCode=//p')"
+          test "$version" = "$GITHUB_REF_NAME"
+          [[ "$version_code" =~ ^[0-9]+$ ]]
+
+          # Release notes are reused verbatim as the in-app changelog.
+          if ! gh api -X POST "repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+            -f tag_name="$GITHUB_REF_NAME" \
+            -f target_commitish="$GITHUB_SHA" --jq '.body' > dist/CHANGELOG.md; then
+            printf '# %s\n\nRelease notes unavailable.\n' "$version" > dist/CHANGELOG.md
+          fi
+          if ! test -s dist/CHANGELOG.md; then
+            printf '# %s\n' "$version" > dist/CHANGELOG.md
+          fi
+
+          cat > dist/update.json <<EOF
+          {
+            "version": "$version",
+            "versionCode": $version_code,
+            "zipUrl": "https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/$(basename "$zip_file")",
+            "changelog": "https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/CHANGELOG.md"
+          }
+          EOF
+          jq -e . dist/update.json >/dev/null
+          cat dist/update.json
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: susfs4ksu-lkm-hide-mounts-by-mask-${{ github.run_number }}
+          path: dist/*.zip
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            dist/*.zip
+            dist/update.json
+            dist/CHANGELOG.md
+          body_path: dist/CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

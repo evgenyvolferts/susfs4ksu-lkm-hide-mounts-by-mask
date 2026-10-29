@@ -1,0 +1,7 @@
+id=susfs4ksu-lkm-hide-mounts-by-mask
+name=SUSFS4KSU-for-LKM Hide Mounts by Mask
+version=v0.1
+versionCode=1000
+author=evgenyvolferts
+description=Hides mountinfo entries using configurable masks via susfs_guard_lkm.
+updateJson=https://github.com/evgenyvolferts/susfs4ksu-lkm-hide-mounts-by-mask/releases/latest/download/update.json

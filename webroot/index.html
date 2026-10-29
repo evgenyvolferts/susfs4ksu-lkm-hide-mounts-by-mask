@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>SUSFS4KSU-for-LKM · Hide Mounts by Mask</title>
+  <link rel="stylesheet" href="/internal/colors.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="hero-symbol" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2.7 20 6v5.2c0 5.1-3.1 8.4-8 10.1-4.9-1.7-8-5-8-10.1V6l8-3.3Z"/>
+          <path d="m8.5 11.8 2.3 2.3 4.7-5"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <div class="eyebrow">SUSFS4KSU-FOR-LKM / susfs_guard_lkm</div>
+        <h1>Hide mounts by mask</h1>
+        <p>Discover and hide mount entries using configurable masks.</p>
+      </div>
+    </header>
+
+    <div class="overview">
+      <div class="status-indicator" id="guardIndicator" data-state="loading" role="status" aria-live="polite">
+        <span class="indicator-dot" aria-hidden="true"></span>
+        <span id="guardLabel">Checking mount hiding…</span>
+      </div>
+      <span class="overview-count"><strong id="prefixCount">—</strong> registered prefixes</span>
+    </div>
+
+    <section class="card editor-card" aria-labelledby="rulesTitle">
+      <div class="card-title-row">
+        <div class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 4H4v16h4M16 4h4v16h-4M11 9l-2.5 3L11 15M13 9l2.5 3L13 15"/>
+          </svg>
+        </div>
+        <div class="card-heading">
+          <h2 id="rulesTitle">Matching rules</h2>
+          <p>Edit which <code>mountinfo</code> entries to register</p>
+        </div>
+      </div>
+
+      <div class="rule-example">
+        <div class="example-title">Syntax <span>FIELD | GLOB | FSTYPE</span></div>
+        <code>root|/adb/*|*</code>
+        <code>target|/data/local/tmp/adg-ca-copy|tmpfs</code>
+      </div>
+
+      <div class="editor-label-row">
+        <label for="rules">rules.conf</label>
+        <div class="editor-meta"><span id="lineCount">0 lines</span><span class="dirty-dot" id="dirtyDot" hidden>Unsaved changes</span></div>
+      </div>
+      <textarea id="rules" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-describedby="editorHelp" placeholder="# FIELD|GLOB|FSTYPE&#10;root|/adb/*|*"></textarea>
+      <p class="field-help" id="editorHelp">One rule per line. Lines starting with <code>#</code> are comments. Changes are saved outside the module and survive updates.</p>
+
+      <div class="button-row">
+        <button id="reload" type="button" class="button button-tonal">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.6 6M20 4v7h-7"/></svg>
+          Reload
+        </button>
+        <div class="button-spacer"></div>
+        <button id="save" type="button" class="button button-outline">Save</button>
+        <button id="apply" type="button" class="button button-primary">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+          Save &amp; scan
+        </button>
+      </div>
+
+      <div id="message" class="feedback" hidden role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card" aria-labelledby="statusTitle">
+      <div class="card-title-row">
+        <div class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 5h16v14H4z"/><path d="m8 10 3 2-3 2M13 15h4"/>
+          </svg>
+        </div>
+        <div class="card-heading">
+          <h2 id="statusTitle">Mount hiding status</h2>
+          <p>Live state of <code>susfs_guard_lkm</code> via <code>/proc/susfs_hide_mounts</code></p>
+        </div>
+      </div>
+      <div class="button-row status-actions">
+        <button id="statusButton" type="button" class="button button-tonal">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.6 6M20 4v7h-7"/></svg>
+          Refresh
+        </button>
+        <button id="scanButton" type="button" class="button button-outline">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5-5 7 5 7M16 5l5 7-5 7M14 4l-4 16"/></svg>
+          Scan now
+        </button>
+      </div>
+      <pre id="status" tabindex="0" aria-label="Raw mount hiding status">Checking status…</pre>
+    </section>
+
+    <aside class="info-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg>
+      <p><strong>Mounts are never unmounted.</strong> Scans only add targets. To fully remove a previously registered rule, remove it from the config and reboot.</p>
+    </aside>
+  </main>
+
+  <dialog id="discardDialog" class="confirm-dialog" aria-labelledby="discardTitle" aria-describedby="discardDescription">
+    <form method="dialog">
+      <div class="confirm-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3 2.5 20h19L12 3Z"/>
+          <path d="M12 9v5M12 17.5h.01"/>
+        </svg>
+      </div>
+      <h2 id="discardTitle">Discard unsaved changes?</h2>
+      <p id="discardDescription">The edits to <code>rules.conf</code> will be lost. Reload the saved configuration?</p>
+      <div class="confirm-actions">
+        <button id="keepEditing" class="button button-tonal" type="submit" value="cancel">Keep editing</button>
+        <button id="discardChanges" class="button button-danger" type="submit" value="discard">Discard &amp; reload</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

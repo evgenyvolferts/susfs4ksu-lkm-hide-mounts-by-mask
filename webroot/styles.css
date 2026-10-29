@@ -1,0 +1,211 @@
+/* Material 3-inspired, no network or framework dependencies.
+   KernelSU Next provides semantic Material You tokens via /internal/colors.css.
+   When unavailable, use the Android/WebView preferred light/dark color scheme. */
+:root {
+  color-scheme: light dark;
+  font-family: Roboto, "Noto Sans", system-ui, -apple-system, sans-serif;
+  font-synthesis: none;
+  -webkit-tap-highlight-color: transparent;
+  --fallback-bg: #f8f9ff;
+  --fallback-surface: #ffffff;
+  --fallback-container: #eef0f8;
+  --fallback-container-high: #e5e8f2;
+  --fallback-text: #1b1b20;
+  --fallback-muted: #464650;
+  --fallback-border: #c5c6d2;
+  --fallback-border-subtle: #e2e2eb;
+  --fallback-primary: #4355ad;
+  --fallback-on-primary: #ffffff;
+  --fallback-primary-container: #dde1ff;
+  --fallback-on-primary-container: #071650;
+  --fallback-error: #b3261e;
+  --fallback-error-container: #f9dedc;
+  --fallback-on-error-container: #410e0b;
+  --fallback-success: #126c43;
+  --fallback-success-container: #d5f4df;
+  --fallback-on-success-container: #00391c;
+
+  --app-bg: var(--background, var(--fallback-bg));
+  --app-surface: var(--surface, var(--fallback-surface));
+  --app-container: var(--surfaceContainer, var(--fallback-container));
+  --app-container-high: var(--surfaceContainerHigh, var(--fallback-container-high));
+  --app-on-surface: var(--onSurface, var(--fallback-text));
+  --app-muted: var(--onSurfaceVariant, var(--fallback-muted));
+  --app-outline: var(--outline, var(--fallback-border));
+  --app-outline-soft: var(--outlineVariant, var(--fallback-border-subtle));
+  --app-primary: var(--primary, var(--fallback-primary));
+  --app-on-primary: var(--onPrimary, var(--fallback-on-primary));
+  --app-primary-container: var(--primaryContainer, var(--fallback-primary-container));
+  --app-on-primary-container: var(--onPrimaryContainer, var(--fallback-on-primary-container));
+  --app-error: var(--error, var(--fallback-error));
+  --app-on-error: var(--onError, #ffffff);
+  --app-error-container: var(--errorContainer, var(--fallback-error-container));
+  --app-on-error-container: var(--onErrorContainer, var(--fallback-on-error-container));
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fallback-bg: #111318;
+    --fallback-surface: #191b22;
+    --fallback-container: #22242d;
+    --fallback-container-high: #2e3039;
+    --fallback-text: #e3e2ea;
+    --fallback-muted: #c4c5d1;
+    --fallback-border: #8d909e;
+    --fallback-border-subtle: #424550;
+    --fallback-primary: #b7c4ff;
+    --fallback-on-primary: #1b287b;
+    --fallback-primary-container: #303f94;
+    --fallback-on-primary-container: #dde1ff;
+    --fallback-error: #ffb4ab;
+    --fallback-error-container: #8c1d18;
+    --fallback-on-error-container: #ffdad6;
+    --fallback-success: #a4e2bd;
+    --fallback-success-container: #125832;
+    --fallback-on-success-container: #c8f4da;
+  }
+}
+* { box-sizing: border-box; }
+html { background: var(--app-bg); }
+body {
+  margin: 0;
+  background: var(--app-bg);
+  color: var(--app-on-surface);
+  font-size: 14px;
+  line-height: 1.5;
+}
+button, textarea { font: inherit; }
+button { -webkit-appearance: none; appearance: none; }
+button:focus-visible, textarea:focus-visible, pre:focus-visible {
+  outline: 3px solid var(--app-primary);
+  outline-offset: 3px;
+}
+.page { max-width: 740px; margin: 0 auto; padding: 24px 16px max(30px, env(safe-area-inset-bottom)); }
+.hero { display: flex; align-items: center; gap: 17px; padding: 5px 0 22px; }
+.hero-symbol {
+  width: 58px; height: 58px; flex: 0 0 58px;
+  display: grid; place-items: center;
+  border-radius: 20px;
+  background: var(--app-primary-container);
+  color: var(--app-on-primary-container);
+}
+.hero-symbol svg { width: 32px; height: 32px; }
+.eyebrow { color: var(--app-primary); font-size: 10px; font-weight: 700; letter-spacing: .085em; margin-bottom: 2px; overflow-wrap: anywhere; }
+h1, h2, p { margin-top: 0; }
+h1 { font-size: clamp(24px, 6vw, 30px); font-weight: 650; letter-spacing: -.9px; line-height: 1.17; margin-bottom: 3px; }
+.hero p { margin-bottom: 0; color: var(--app-muted); font-size: 13px; line-height: 1.35; }
+.overview { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 0 2px 18px; }
+.status-indicator {
+  display: inline-flex; align-items: center; gap: 9px; min-height: 34px;
+  padding: 6px 13px; border-radius: 100px;
+  background: var(--app-container-high); color: var(--app-on-surface);
+  font-weight: 550; font-size: 12px;
+}
+.status-indicator[data-state="ready"] { background: var(--fallback-success-container); color: var(--fallback-on-success-container); }
+.status-indicator[data-state="error"] { background: var(--app-error-container); color: var(--app-on-error-container); }
+.indicator-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .82; }
+.overview-count { color: var(--app-muted); font-size: 12px; }
+.overview-count strong { color: var(--app-on-surface); font-weight: 700; font-variant-numeric: tabular-nums; }
+.card {
+  padding: 22px;
+  background: var(--app-surface);
+  border-radius: 27px;
+  border: 1px solid var(--app-outline-soft);
+  margin-bottom: 16px;
+}
+.card-title-row { display: flex; align-items: flex-start; gap: 13px; margin-bottom: 21px; }
+.card-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px; flex-shrink: 0; background: var(--app-container); color: var(--app-primary); }
+.card-icon svg { width: 22px; height: 22px; }
+.card-heading { min-width: 0; padding-top: 1px; }
+h2 { font-size: 18px; line-height: 1.28; font-weight: 650; letter-spacing: -.25px; margin: 0 0 3px; }
+.card-heading p { color: var(--app-muted); margin: 0; font-size: 12.5px; line-height: 1.4; }
+code, pre { font-family: ui-monospace, "SFMono-Regular", Consolas, "Roboto Mono", monospace; }
+.rule-example { background: var(--app-container); border-radius: 17px; padding: 14px 16px; margin-bottom: 19px; }
+.example-title { font-weight: 650; font-size: 11px; margin-bottom: 9px; color: var(--app-on-surface); }
+.example-title span { font-weight: 450; color: var(--app-muted); margin-left: 5px; letter-spacing: .02em; }
+.rule-example code { display: block; color: var(--app-muted); font-size: 11.5px; overflow-wrap: anywhere; line-height: 1.7; }
+.editor-label-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.editor-label-row label { font-weight: 650; font-size: 13px; }
+.editor-meta { display: inline-flex; align-items: center; gap: 11px; color: var(--app-muted); font-size: 11px; }
+.dirty-dot { color: var(--app-primary); font-weight: 600; }
+.dirty-dot::before { content: ""; display: inline-block; background: currentColor; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+textarea {
+  width: 100%; min-height: 210px; resize: vertical;
+  border: 1px solid var(--app-outline);
+  border-radius: 15px;
+  padding: 14px;
+  background: var(--app-container);
+  color: var(--app-on-surface);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Roboto Mono", monospace;
+  font-size: 12.5px; line-height: 1.62;
+  display: block;
+  caret-color: var(--app-primary);
+}
+textarea::placeholder { color: var(--app-muted); opacity: .8; }
+.field-help { margin: 10px 2px 0; font-size: 11.5px; color: var(--app-muted); line-height: 1.5; }
+.button-row { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+.button-spacer { flex: 1; }
+.button {
+  border-radius: 100px; border: 1px solid transparent;
+  min-height: 44px; padding: 0 17px;
+  display: inline-flex; gap: 8px; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 13px; font-weight: 650;
+  transition: background-color .18s, border-color .18s, opacity .18s;
+}
+.button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.button-primary { background: var(--app-primary); color: var(--app-on-primary); }
+.button-tonal { background: var(--app-primary-container); color: var(--app-on-primary-container); }
+.button-outline { border-color: var(--app-outline); color: var(--app-primary); background: transparent; }
+.button:disabled { opacity: .45; cursor: not-allowed; }
+.button:not(:disabled):active { transform: scale(.985); }
+.feedback { margin-top: 16px; border-radius: 14px; padding: 12px 14px; font-size: 12.5px; white-space: pre-wrap; }
+.feedback[data-kind="ok"] { background: var(--fallback-success-container); color: var(--fallback-on-success-container); }
+.feedback[data-kind="error"] { background: var(--app-error-container); color: var(--app-on-error-container); }
+.status-actions { margin-top: -3px; margin-bottom: 16px; }
+pre {
+  margin: 0; border-radius: 16px; background: var(--app-container);
+  color: var(--app-on-surface);
+  padding: 16px; font-size: 11.5px; line-height: 1.65;
+  white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: auto;
+  max-height: 300px; overflow-y: auto;
+}
+.info-note { display: flex; align-items: flex-start; gap: 12px; padding: 4px 8px 4px 7px; color: var(--app-muted); }
+.info-note svg { height: 20px; width: 20px; flex: 0 0 20px; color: var(--app-primary); }
+.info-note p { font-size: 12px; line-height: 1.55; margin: 0; }
+.info-note strong { color: var(--app-on-surface); font-weight: 650; }
+
+/* Native <dialog> provides focus management, Escape/Back dismissal and a modal backdrop.
+   Its surface and buttons use the same Material You tokens as the WebUI. */
+.confirm-dialog {
+  width: min(420px, calc(100% - 36px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  margin: auto;
+  padding: 24px;
+  border: 1px solid var(--app-outline-soft);
+  border-radius: 28px;
+  background: var(--app-container-high);
+  color: var(--app-on-surface);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, .24);
+}
+.confirm-dialog::backdrop { background: rgba(0, 0, 0, .55); }
+.confirm-dialog h2 { font-size: 22px; margin: 14px 0 10px; }
+.confirm-dialog p { font-size: 14px; color: var(--app-muted); margin: 0; line-height: 1.55; }
+.confirm-icon { color: var(--app-error); width: 24px; height: 24px; }
+.confirm-icon svg { width: 24px; height: 24px; }
+.confirm-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+.confirm-actions .button { min-height: 40px; }
+.button-danger { background: var(--app-error); color: var(--app-on-error); }
+@media (max-width: 510px) {
+  .page { padding: 17px 12px max(28px, env(safe-area-inset-bottom)); }
+  .hero { gap: 13px; padding-bottom: 18px; }
+  .hero-symbol { width: 50px; height: 50px; flex-basis: 50px; border-radius: 17px; }
+  .hero-symbol svg { width: 28px; height: 28px; }
+  .card { padding: 18px 15px; border-radius: 24px; }
+  .button-row { gap: 8px; }
+  .button { padding: 0 13px; font-size: 12px; }
+  .editor-card .button-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .editor-card .button-spacer { display: none; }
+  .editor-card #apply { grid-column: span 2; }
+  .editor-card .button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .button { transition: none; } }
