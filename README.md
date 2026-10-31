@@ -88,3 +88,25 @@ Mount-hiding does not guarantee passing a root or integrity detector. The origin
 ## Removal
 
 The module can be disabled or removed through KernelSU Next Manager. The persistent directory `/data/adb/susfs4ksu-lkm-hide-mounts-by-mask/` is retained intentionally to preserve custom rules across reinstalls; it can be deleted separately when no longer needed. Disabling the module does not immediately revoke kernel-side rules that were already registered during the current boot.
+
+## Known issue: `/adb`-backed bind mounts
+
+Starting with **v0.1.1**, the broad `root|/adb/*|*` rule is commented out by default.
+
+When SUSFS mount hiding is enabled, hiding certain bind mounts backed by `/data` may cause inconsistent `/proc/self/mountinfo` entries. In testing, this resulted in the parent `/data` mount entry being omitted while child mount entries remained visible.
+
+This behavior was reproduced with YouTube Morphe and Zygisk Vector bind mounts. It may trigger `Inconsistent Mount` warnings in root detection tools.
+
+The issue can also occur with individual target rules, so replacing the broad rule with narrower rules does not necessarily resolve it.
+
+**Upstream issue:** [SUSFS4KSU-for-LKM #167](https://github.com/inforcqb/susfs4ksu-for-lkm/issues/167)
+
+**For existing installations:**
+
+- Comment out `root|/adb/*|*` in your saved `rules.conf` if the rule is enabled.
+- Review any explicit rules matching `/adb`-backed bind mounts.
+- Reboot the device after modifying the rules. Removing prefixes at runtime may not immediately clear previously learned mount identities.
+
+Existing user configurations are preserved during module updates. The new default does not automatically disable previously enabled rules.
+
+This limitation affects the underlying SUSFS mount-hiding mechanism. The module itself only discovers matching mounts and registers their target paths through `/proc/susfs_hide_mounts`.
